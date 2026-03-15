@@ -1,6 +1,6 @@
 # AI Laws of Simplicity
 
-A standalone skill that guides AI agents to apply John Maeda's 10 Laws of Simplicity throughout the software development lifecycle.
+A standalone skill that guides AI agents to apply [John Maeda's 10 Laws of Simplicity](https://lawsofsimplicity.com/) throughout the software development lifecycle.
 
 ## Overview
 
