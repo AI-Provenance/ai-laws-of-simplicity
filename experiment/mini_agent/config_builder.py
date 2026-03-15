@@ -54,14 +54,20 @@ def build_config(
 
     Returns:
         Config dict suitable for mini-swe-agent
-
-    Note:
-        The /testbed path is the default working directory used by mini-swe-agent
-        Docker containers for isolated task execution.
     """
     system_template = BASE_SYSTEM_TEMPLATE
     if skill_content:
         system_template = skill_content.strip() + "\n\n---\n\n" + system_template
+
+    litellm_model_name = model_name
+    model_kwargs = {
+        "drop_params": True,
+        "temperature": temperature,
+    }
+
+    if model_name.startswith("nexos/"):
+        litellm_model_name = f"openai/{model_name.split('/', 1)[1]}"
+        model_kwargs["api_base"] = "https://api.nexos.ai/v1"
 
     return {
         "agent": {
@@ -84,11 +90,8 @@ def build_config(
             "environment_class": "docker",  # Required for mini-swe-agent isolation
         },
         "model": {
-            "model_name": model_name,
-            "model_kwargs": {
-                "drop_params": True,
-                "temperature": temperature,
-            },
+            "model_name": litellm_model_name,
+            "model_kwargs": model_kwargs,
         },
     }
 
