@@ -1,4 +1,5 @@
 import json
+import logging
 import random
 from pathlib import Path
 from typing import Any
@@ -82,7 +83,8 @@ class SWEBenchHarness(BenchmarkHarness):
                 repo_path=str(solution_path),
             )
             return results.get("passed", 0) == results.get("total", 1)
-        except Exception:
+        except Exception as e:
+            logging.warning(f"SWE-bench verification failed for {task.task_id}: {e}")
             return False
 
     def get_task_metadata(self, task_id: str) -> dict[str, Any]:

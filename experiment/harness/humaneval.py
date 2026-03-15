@@ -1,4 +1,5 @@
 import json
+import logging
 import random
 from pathlib import Path
 from typing import Any
@@ -80,7 +81,8 @@ class HumanEvalHarness(BenchmarkHarness):
                 timeout=30,
             )
             return result.returncode == 0
-        except Exception:
+        except Exception as e:
+            logging.warning(f"HumanEval verification failed for {task.task_id}: {e}")
             return False
 
     def get_task_metadata(self, task_id: str) -> dict[str, Any]:

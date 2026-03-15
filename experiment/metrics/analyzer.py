@@ -48,6 +48,12 @@ def paired_token_test(df: pd.DataFrame) -> tuple[float, float, float, float, flo
     control = df[df["condition"] == "control"]["total_tokens"]
     treatment = df[df["condition"] == "treatment"]["total_tokens"]
 
+    # Validate paired data
+    if len(control) != len(treatment):
+        raise ValueError(
+            f"Paired test requires equal sample sizes: control={len(control)}, treatment={len(treatment)}"
+        )
+
     # Paired t-test (tasks are paired)
     t_stat, p_value = stats.ttest_rel(control, treatment)
 
@@ -182,9 +188,11 @@ def analyze_by_difficulty(df: pd.DataFrame, metadata: dict[str, Any]) -> dict[st
                 "groups": tukey.groupsunique.tolist(),
                 "reject": tukey.reject.tolist(),
             }
-        except Exception:
-            # ANOVA may fail with insufficient data
-            pass
+        except Exception as e:
+            import logging
+
+            logging.warning(f"ANOVA failed: {e}")
+            results["anova_error"] = str(e)
 
     return results
 
