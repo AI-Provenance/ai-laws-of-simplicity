@@ -1,0 +1,199 @@
+experiment/mini_agent/trajectory_parser.py
+  b708fc87be12db66 1-58
+tests/test_trajectory_parser.py
+  b708fc87be12db66 1-252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.11",
+  "base_commit_sha": "b009f978f6a001f65c91c5ae4a0c5e02f45ee32a",
+  "prompts": {
+    "b708fc87be12db66": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_30d50bc1effe1Twfmfjw99PCGx",
+        "model": "nexosai/Claude Sonnet 4.5 (Trusted)"
+      },
+      "human_author": "Shahriyar Rzayev <rzayev.sehriyar@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "You are implementing Task 3: Create trajectory parser\n\n## Task Description\n\n**Files:**\n- Create: `experiment/mini_agent/trajectory_parser.py`\n\n- [ ] **Step 1: Create trajectory_parser.py**\n\nThis extracts metrics from mini-swe-agent's run output. The `DefaultAgent.run()` returns a dict with trajectory data.\n\n```python\n# experiment/mini_agent/trajectory_parser.py\nfrom typing import Any\n\n\ndef parse_run_result(result: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Parse mini-swe-agent run result into experiment metrics.\n    \n    Args:\n        result: Dict returned by DefaultAgent.run()\n        \n    Returns:\n        Dict with standardized metrics:\n        - input_tokens: Total input tokens across all turns\n        - output_tokens: Total output tokens across all turns\n        - num_turns: Number of agent steps taken\n        - cost: Total USD cost\n        - exit_status: How agent stopped (submitted/step_limit/cost_limit/error)\n        - patch: Generated patch text (if any)\n    \"\"\"\n    info = result.get(\"info\", {})\n    model_stats = info.get(\"model_stats\", {})\n    \n    return {\n        \"input_tokens\": model_stats.get(\"tokens_sent\", 0),\n        \"output_tokens\": model_stats.get(\"tokens_received\", 0),\n        \"num_turns\": model_stats.get(\"api_calls\", 0),\n        \"cost\": model_stats.get(\"instance_cost\", 0.0),\n        \"exit_status\": info.get(\"exit_status\", \"unknown\"),\n        \"patch\": info.get(\"submission\", \"\"),\n    }\n\n\ndef parse_serialized_trajectory(trajectory_path: str) -> dict[str, Any]:\n    \"\"\"Parse a saved trajectory JSON file.\n    \n    Args:\n        trajectory_path: Path to saved trajectory JSON\n        \n    Returns:\n        Same format as parse_run_result\n    \"\"\"\n    import json\n    from pathlib import Path\n    \n    path = Path(trajectory_path)\n    if not path.exists():\n        return {\n            \"input_tokens\": 0,\n            \"output_tokens\": 0,\n            \"num_turns\": 0,\n            \"cost\": 0.0,\n            \"exit_status\": \"not_found\",\n            \"patch\": \"\",\n        }\n    \n    with open(path) as f:\n        data = json.load(f)\n    \n    return parse_run_result(data)\n```\n\n- [ ] **Step 2: Commit**\n\n```bash\ngit add experiment/mini_agent/trajectory_parser.py\ngit commit -m \"feat: add trajectory parser for mini-swe-agent metrics extraction\"\n```\n\n## Context\n\nThis is Task 3 in the mini-swe-agent integration plan. The trajectory parser extracts metrics from mini-swe-agent's execution results:\n\n**Key metrics:**\n- `input_tokens`: Total tokens sent to LLM across all turns\n- `output_tokens`: Total tokens received from LLM\n- `num_turns`: Number of agent steps (API calls)\n- `cost`: Total USD cost\n- `exit_status`: How agent stopped (submitted/step_limit/cost_limit/error)\n- `patch`: The generated code patch\n\nThese metrics will be used by MiniAgentRunner (Task 5) to collect experiment data. The research question is whether the Laws of Simplicity skill reduces wall-clock time and wasted exploration steps.\n\nProject structure after this task:\n```\nexperiment/mini_agent/\n├── __init__.py\n├── config_builder.py   (Task 2 - DONE)\n├── trajectory_parser.py (Task 3 - THIS TASK)\n└── runner.py           (Task 5 - pending)\n```\n\n## Before You Begin\n\nIf you have questions about requirements, approach, dependencies, or anything unclear - ask now before starting work.\n\n## Your Job\n\nOnce you're clear on requirements:\n1. Implement exactly what the task specifies\n2. Write tests (following TDD if task says to)\n3. Verify implementation works\n4. Commit your work\n5. Self-review\n6. Report back\n\nWork from: /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity\n\n**While you work:** If you encounter something unexpected or unclear, **ask questions**. Don't guess or make assumptions.\n\n## Before Reporting Back: Self-Review\n\nReview your work with fresh eyes. Ask yourself:\n- Did I fully implement everything in the spec?\n- Did I miss any requirements?\n- Is this my best work?\n- Are names clear and accurate?\n- Did I avoid overbuilding (YAGNI)?\n- Did I only build what was requested?\n\nIf you find issues during self-review, fix them now before reporting.\n\n## Report Format\n\nWhen done, report:\n- **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT\n- What you implemented (or what you attempted, if blocked)\n- What you tested and test results\n- Files changed\n- Self-review findings (if any)\n- Any issues or concerns\n\nUse DONE_WITH_CONCERNS if you completed the work but have doubts about correctness. Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need information that wasn't provided. Never silently produce work you're unsure about.",
+          "timestamp": "2026-03-15T18:08:18.405+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "read",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity/experiment/mini_agent"
+          },
+          "timestamp": "2026-03-15T18:08:18.408+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "find /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity -name \"*.py\" -path \"*/mini_agent/*\" | head -20",
+            "description": "Find existing mini_agent Python files"
+          },
+          "timestamp": "2026-03-15T18:08:18.408+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll implement Task 3: Create trajectory parser for mini-swe-agent metrics extraction.\n\nLet me first understand the existing structure and verify the requirements:",
+          "timestamp": "2026-03-15T18:08:18.408+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "find /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity -type d -name \"*test*\" -o -name \"*spec*\" | head -10",
+            "description": "Find test directories"
+          },
+          "timestamp": "2026-03-15T18:08:22.226+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "glob",
+          "input": {
+            "pattern": "**/*test*.py"
+          },
+          "timestamp": "2026-03-15T18:08:22.226+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Good, the directory structure exists from Task 2. Now let me check if there's a test structure I should follow:",
+          "timestamp": "2026-03-15T18:08:22.226+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Let me check the existing test for mini_agent to understand the testing pattern:",
+          "timestamp": "2026-03-15T18:08:26.630+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "read",
+          "input": {
+            "filePath": "/home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity/tests/test_mini_agent_config.py"
+          },
+          "timestamp": "2026-03-15T18:08:26.630+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "write",
+          "input": {
+            "content": "from typing import Any\n\n\ndef parse_run_result(result: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Parse mini-swe-agent run result into experiment metrics.\n    \n    Args:\n        result: Dict returned by DefaultAgent.run()\n        \n    Returns:\n        Dict with standardized metrics:\n        - input_tokens: Total input tokens across all turns\n        - output_tokens: Total output tokens across all turns\n        - num_turns: Number of agent steps taken\n        - cost: Total USD cost\n        - exit_status: How agent stopped (submitted/step_limit/cost_limit/error)\n        - patch: Generated patch text (if any)\n    \"\"\"\n    info = result.get(\"info\", {})\n    model_stats = info.get(\"model_stats\", {})\n    \n    return {\n        \"input_tokens\": model_stats.get(\"tokens_sent\", 0),\n        \"output_tokens\": model_stats.get(\"tokens_received\", 0),\n        \"num_turns\": model_stats.get(\"api_calls\", 0),\n        \"cost\": model_stats.get(\"instance_cost\", 0.0),\n        \"exit_status\": info.get(\"exit_status\", \"unknown\"),\n        \"patch\": info.get(\"submission\", \"\"),\n    }\n\n\ndef parse_serialized_trajectory(trajectory_path: str) -> dict[str, Any]:\n    \"\"\"Parse a saved trajectory JSON file.\n    \n    Args:\n        trajectory_path: Path to saved trajectory JSON\n        \n    Returns:\n        Same format as parse_run_result\n    \"\"\"\n    import json\n    from pathlib import Path\n    \n    path = Path(trajectory_path)\n    if not path.exists():\n        return {\n            \"input_tokens\": 0,\n            \"output_tokens\": 0,\n            \"num_turns\": 0,\n            \"cost\": 0.0,\n            \"exit_status\": \"not_found\",\n            \"patch\": \"\",\n        }\n    \n    with open(path) as f:\n        data = json.load(f)\n    \n    return parse_run_result(data)\n",
+            "filePath": "/home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity/experiment/mini_agent/trajectory_parser.py"
+          },
+          "timestamp": "2026-03-15T18:08:29.706+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Good, I understand the testing pattern. Now let me create the trajectory_parser.py file:",
+          "timestamp": "2026-03-15T18:08:29.706+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "write",
+          "input": {
+            "content": "import json\nfrom pathlib import Path\n\nimport pytest\n\nfrom experiment.mini_agent.trajectory_parser import (\n    parse_run_result,\n    parse_serialized_trajectory,\n)\n\n\ndef test_parse_run_result_complete():\n    \"\"\"Test parsing a complete run result with all fields.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {\n                \"tokens_sent\": 1500,\n                \"tokens_received\": 500,\n                \"api_calls\": 10,\n                \"instance_cost\": 0.025,\n            },\n            \"exit_status\": \"submitted\",\n            \"submission\": \"diff --git a/file.py b/file.py\\n...\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"input_tokens\"] == 1500\n    assert parsed[\"output_tokens\"] == 500\n    assert parsed[\"num_turns\"] == 10\n    assert parsed[\"cost\"] == 0.025\n    assert parsed[\"exit_status\"] == \"submitted\"\n    assert parsed[\"patch\"] == \"diff --git a/file.py b/file.py\\n...\"\n\n\ndef test_parse_run_result_minimal():\n    \"\"\"Test parsing run result with missing optional fields.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {},\n            \"exit_status\": \"step_limit\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"input_tokens\"] == 0\n    assert parsed[\"output_tokens\"] == 0\n    assert parsed[\"num_turns\"] == 0\n    assert parsed[\"cost\"] == 0.0\n    assert parsed[\"exit_status\"] == \"step_limit\"\n    assert parsed[\"patch\"] == \"\"\n\n\ndef test_parse_run_result_empty():\n    \"\"\"Test parsing completely empty result.\"\"\"\n    result = {}\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"input_tokens\"] == 0\n    assert parsed[\"output_tokens\"] == 0\n    assert parsed[\"num_turns\"] == 0\n    assert parsed[\"cost\"] == 0.0\n    assert parsed[\"exit_status\"] == \"unknown\"\n    assert parsed[\"patch\"] == \"\"\n\n\ndef test_parse_run_result_partial_model_stats():\n    \"\"\"Test parsing with partial model_stats.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {\n                \"tokens_sent\": 1000,\n                \"api_calls\": 5,\n            },\n            \"exit_status\": \"cost_limit\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"input_tokens\"] == 1000\n    assert parsed[\"output_tokens\"] == 0\n    assert parsed[\"num_turns\"] == 5\n    assert parsed[\"cost\"] == 0.0\n    assert parsed[\"exit_status\"] == \"cost_limit\"\n\n\ndef test_parse_run_result_error_exit():\n    \"\"\"Test parsing result with error exit status.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {\n                \"tokens_sent\": 300,\n                \"tokens_received\": 100,\n                \"api_calls\": 3,\n                \"instance_cost\": 0.005,\n            },\n            \"exit_status\": \"error\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"exit_status\"] == \"error\"\n    assert parsed[\"input_tokens\"] == 300\n    assert parsed[\"output_tokens\"] == 100\n\n\ndef test_parse_serialized_trajectory_success(tmp_path):\n    \"\"\"Test parsing a saved trajectory JSON file.\"\"\"\n    trajectory_data = {\n        \"info\": {\n            \"model_stats\": {\n                \"tokens_sent\": 2000,\n                \"tokens_received\": 800,\n                \"api_calls\": 15,\n                \"instance_cost\": 0.04,\n            },\n            \"exit_status\": \"submitted\",\n            \"submission\": \"patch content here\",\n        }\n    }\n\n    trajectory_file = tmp_path / \"trajectory.json\"\n    trajectory_file.write_text(json.dumps(trajectory_data))\n\n    parsed = parse_serialized_trajectory(str(trajectory_file))\n\n    assert parsed[\"input_tokens\"] == 2000\n    assert parsed[\"output_tokens\"] == 800\n    assert parsed[\"num_turns\"] == 15\n    assert parsed[\"cost\"] == 0.04\n    assert parsed[\"exit_status\"] == \"submitted\"\n    assert parsed[\"patch\"] == \"patch content here\"\n\n\ndef test_parse_serialized_trajectory_missing_file(tmp_path):\n    \"\"\"Test parsing non-existent trajectory file.\"\"\"\n    nonexistent = tmp_path / \"does_not_exist.json\"\n\n    parsed = parse_serialized_trajectory(str(nonexistent))\n\n    assert parsed[\"input_tokens\"] == 0\n    assert parsed[\"output_tokens\"] == 0\n    assert parsed[\"num_turns\"] == 0\n    assert parsed[\"cost\"] == 0.0\n    assert parsed[\"exit_status\"] == \"not_found\"\n    assert parsed[\"patch\"] == \"\"\n\n\ndef test_parse_serialized_trajectory_empty_file(tmp_path):\n    \"\"\"Test parsing empty trajectory file.\"\"\"\n    trajectory_file = tmp_path / \"empty.json\"\n    trajectory_file.write_text(\"{}\")\n\n    parsed = parse_serialized_trajectory(str(trajectory_file))\n\n    assert parsed[\"input_tokens\"] == 0\n    assert parsed[\"exit_status\"] == \"unknown\"\n\n\ndef test_parse_serialized_trajectory_minimal(tmp_path):\n    \"\"\"Test parsing trajectory with minimal data.\"\"\"\n    trajectory_data = {\n        \"info\": {\n            \"exit_status\": \"step_limit\",\n        }\n    }\n\n    trajectory_file = tmp_path / \"minimal.json\"\n    trajectory_file.write_text(json.dumps(trajectory_data))\n\n    parsed = parse_serialized_trajectory(str(trajectory_file))\n\n    assert parsed[\"exit_status\"] == \"step_limit\"\n    assert parsed[\"input_tokens\"] == 0\n    assert parsed[\"output_tokens\"] == 0\n\n\ndef test_parse_run_result_zero_cost():\n    \"\"\"Test that zero cost is preserved, not treated as missing.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {\n                \"instance_cost\": 0.0,\n            },\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"cost\"] == 0.0\n\n\ndef test_parse_run_result_empty_patch():\n    \"\"\"Test that empty string patch is preserved.\"\"\"\n    result = {\n        \"info\": {\n            \"submission\": \"\",\n            \"exit_status\": \"submitted\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert parsed[\"patch\"] == \"\"\n    assert parsed[\"exit_status\"] == \"submitted\"\n\n\ndef test_parsed_result_structure():\n    \"\"\"Test that parsed result has all expected keys.\"\"\"\n    result = {}\n    parsed = parse_run_result(result)\n\n    expected_keys = {\n        \"input_tokens\",\n        \"output_tokens\",\n        \"num_turns\",\n        \"cost\",\n        \"exit_status\",\n        \"patch\",\n    }\n\n    assert set(parsed.keys()) == expected_keys\n\n\ndef test_parse_run_result_types():\n    \"\"\"Test that parsed values have correct types.\"\"\"\n    result = {\n        \"info\": {\n            \"model_stats\": {\n                \"tokens_sent\": 100,\n                \"tokens_received\": 50,\n                \"api_calls\": 3,\n                \"instance_cost\": 0.01,\n            },\n            \"exit_status\": \"submitted\",\n            \"submission\": \"patch\",\n        }\n    }\n\n    parsed = parse_run_result(result)\n\n    assert isinstance(parsed[\"input_tokens\"], int)\n    assert isinstance(parsed[\"output_tokens\"], int)\n    assert isinstance(parsed[\"num_turns\"], int)\n    assert isinstance(parsed[\"cost\"], float)\n    assert isinstance(parsed[\"exit_status\"], str)\n    assert isinstance(parsed[\"patch\"], str)\n",
+            "filePath": "/home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity/tests/test_trajectory_parser.py"
+          },
+          "timestamp": "2026-03-15T18:08:44.419+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Good! Now let me create comprehensive tests for the trajectory parser:",
+          "timestamp": "2026-03-15T18:08:44.419+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && python -m pytest tests/test_trajectory_parser.py -v",
+            "description": "Run trajectory parser tests"
+          },
+          "timestamp": "2026-03-15T18:09:13.051+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Now let's run the tests to verify the implementation:",
+          "timestamp": "2026-03-15T18:09:13.051+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && python3 -m pytest tests/test_trajectory_parser.py -v",
+            "description": "Run trajectory parser tests with python3"
+          },
+          "timestamp": "2026-03-15T18:09:16.680+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && ls -la | head -20",
+            "description": "List root directory files"
+          },
+          "timestamp": "2026-03-15T18:09:19.876+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && cat pyproject.toml | grep -A5 \"test\"",
+            "description": "Check test commands in pyproject.toml"
+          },
+          "timestamp": "2026-03-15T18:09:19.876+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Let me check how to run tests in this project:",
+          "timestamp": "2026-03-15T18:09:19.876+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && .venv/bin/pytest tests/test_trajectory_parser.py -v",
+            "description": "Run tests using venv pytest"
+          },
+          "timestamp": "2026-03-15T18:09:24.388+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Let me check if there's a venv:",
+          "timestamp": "2026-03-15T18:09:24.388+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && git add experiment/mini_agent/trajectory_parser.py tests/test_trajectory_parser.py",
+            "description": "Stage trajectory parser files"
+          },
+          "timestamp": "2026-03-15T18:09:28.272+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "Excellent! All tests pass. Now let's commit the work:",
+          "timestamp": "2026-03-15T18:09:28.272+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "cd /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity && git commit -m \"feat: add trajectory parser for mini-swe-agent metrics extraction\"",
+            "description": "Commit trajectory parser"
+          },
+          "timestamp": "2026-03-15T18:09:28.272+00:00"
+        }
+      ],
+      "total_additions": 310,
+      "total_deletions": 0,
+      "accepted_lines": 310,
+      "overriden_lines": 0
+    }
+  }
+}
