@@ -5,6 +5,43 @@
 
 ---
 
+## Recent Changes
+
+### 2026-03-15: Direct API Integration
+
+Switched from OpenCode CLI integration to direct LLM API calls:
+
+- **Why**: OpenCode doesn't support batch mode; needed clean token tracking
+- **What**: Added provider abstraction layer supporting Anthropic, OpenAI, OpenRouter
+- **How**: Created `experiment/providers/` module with unified interface
+- **Impact**: Can now run experiments with any LLM provider/model with accurate token tracking
+
+### Provider Architecture
+
+```
+experiment/providers/
+├── base.py              # LLMProvider abstract base class
+├── config.py            # ModelConfig for flexible model selection
+├── anthropic_provider.py
+├── openai_provider.py
+├── litellm_provider.py  # Universal provider via LiteLLM
+└── __init__.py          # Factory: create_provider()
+```
+
+### Migration from CLI to API
+
+**Before**:
+- Calls `opencode --no-tui` subprocess
+- Extracts tokens from OpenCode SQLite database
+- Limited to OpenCode-supported models
+
+**After**:
+- Direct SDK calls (anthropic, openai, litellm)
+- Tokens from API response objects
+- Any model/provider supported
+
+---
+
 ## Summary
 
 Complete implementation of an automated A/B experiment runner to measure the impact of the Laws of Simplicity skill on AI coding agent token efficiency.

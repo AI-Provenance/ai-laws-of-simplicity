@@ -34,6 +34,71 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AI-Provenan
 
 See the [INSTALL.md](INSTALL.md) file for detailed, agent-agnostic installation instructions.
 
+## Model Configuration
+
+The experiment supports multiple LLM providers:
+
+### Using Anthropic (Claude)
+
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
+
+uv run python -m experiment.runner \
+  --model "anthropic/claude-3-5-sonnet-20241022" \
+  --benchmarks swe_bench_lite \
+  --num-tasks 5
+```
+
+### Using OpenAI (GPT)
+
+```bash
+export OPENAI_API_KEY="your-key-here"
+
+uv run python -m experiment.runner \
+  --model "openai/gpt-4-turbo" \
+  --benchmarks swe_bench_lite \
+  --num-tasks 5
+```
+
+### Using OpenRouter (Multi-Provider)
+
+```bash
+export OPENROUTER_API_KEY="your-key-here"
+
+uv run python -m experiment.runner \
+  --model "openrouter/anthropic/claude-3.5-sonnet" \
+  --benchmarks swe_bench_lite \
+  --num-tasks 5
+```
+
+### Programmatic Usage
+
+```python
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
+
+config = ExperimentConfig(
+    benchmarks=["swe_bench_lite"],
+    num_tasks_per_benchmark=5,
+    runner_type="api",
+    model_string="anthropic/claude-3-5-sonnet-20241022",
+)
+
+runner = ExperimentRunner(config)
+runner.run()
+```
+
+### Switching Back to OpenCode CLI
+
+To use the original OpenCode integration:
+
+```python
+config = ExperimentConfig(
+    runner_type="cli",
+    agent_model="opencode-go/glm-5",
+)
+```
+
 ## Usage
 
 Once installed, activate the skill in your agent:
