@@ -57,8 +57,6 @@ Consider invoking this skill:
 ## Files in This Repository
 
 - `skills/laws-of-simplicity/SKILL.md` - The skill file containing the Laws of Simplicity guidelines
-- `docs/superpowers/specs/2026-03-15-laws-of-simplicity-skill-design.md` - Design document for the skill
-- `docs/superpowers/plans/2026-03-15-laws-of-simplicity-skill-implementation.md` - Implementation plan
 - `INSTALL.md` - Generic installation guide for any AI coding agent
 
 ## License
