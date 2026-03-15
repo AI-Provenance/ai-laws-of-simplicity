@@ -290,9 +290,10 @@ def test_run_agent_saves_trajectory(runner_with_output_dir):
 
         runner_with_output_dir.run_agent(ctx, "Test task")
 
-        mock_agent_instance.save.assert_called_once_with(
-            runner_with_output_dir.output_dir
-        )
+        mock_agent_instance.save.assert_called_once()
+        save_path = mock_agent_instance.save.call_args[0][0]
+        assert save_path.parent == runner_with_output_dir.output_dir
+        assert save_path.suffix == ".json"
 
 
 def test_run_agent_no_save_without_output_dir(runner):

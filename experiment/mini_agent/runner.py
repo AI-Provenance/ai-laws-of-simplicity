@@ -106,7 +106,10 @@ class MiniAgentRunner:
             metrics = parse_run_result(result)
 
             if self.output_dir:
-                agent.save(self.output_dir)
+                task_id = task_prompt[:80].replace("/", "_").replace(" ", "_")
+                condition = "treatment" if ctx.get("skill_content") else "control"
+                trajectory_file = self.output_dir / f"{task_id}_{condition}.json"
+                agent.save(trajectory_file)
 
             return {
                 "input_tokens": metrics["input_tokens"],
