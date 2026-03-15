@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal, cast
 
 
-ProviderType = Literal["anthropic", "openai", "openrouter", "litellm"]
+ProviderType = Literal["anthropic", "openai", "openrouter", "nexos", "litellm"]
 
 
 @dataclass
@@ -26,6 +26,7 @@ class ModelConfig:
             - 'anthropic/claude-3-5-sonnet-20241022'
             - 'openai/gpt-4-turbo'
             - 'openrouter/anthropic/claude-3.5-sonnet'
+            - 'nexos/claude-3-5-sonnet'
             - 'litellm/openai/gpt-4' (use litellm unified interface)
         """
         if "/" in model_string:
@@ -45,6 +46,7 @@ class ModelConfig:
             "anthropic": "ANTHROPIC_API_KEY",
             "openai": "OPENAI_API_KEY",
             "openrouter": "OPENROUTER_API_KEY",
+            "nexos": "NEXOS_API_KEY",
             "litellm": "OPENAI_API_KEY",
         }
 

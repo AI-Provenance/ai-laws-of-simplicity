@@ -71,6 +71,17 @@ uv run python -m experiment.runner \
   --num-tasks 5
 ```
 
+### Using Nexos.ai
+
+```bash
+export NEXOS_API_KEY="your-key-here"
+
+uv run python -m experiment.runner \
+  --model "nexos/claude-3-5-sonnet" \
+  --benchmarks swe_bench_lite \
+  --num-tasks 5
+```
+
 ### Programmatic Usage
 
 ```python

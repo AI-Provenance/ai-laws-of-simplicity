@@ -22,6 +22,7 @@ def create_provider(config: ModelConfig) -> LLMProvider:
         "anthropic": AnthropicProvider,
         "openai": OpenAIProvider,
         "openrouter": OpenAIProvider,
+        "nexos": OpenAIProvider,
         "litellm": LiteLLMProvider,
     }
 

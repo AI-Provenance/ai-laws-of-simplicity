@@ -6,13 +6,17 @@ from experiment.providers.config import ModelConfig
 
 
 class OpenAIProvider(LLMProvider):
-    """OpenAI GPT API provider."""
+    """OpenAI GPT API provider (also compatible with OpenRouter and Nexos.ai)."""
 
     def __init__(self, config: ModelConfig):
         self.config = config
         kwargs = {"api_key": config.get_api_key()}
+
         if config.base_url:
             kwargs["base_url"] = config.base_url
+        elif config.provider == "nexos":
+            kwargs["base_url"] = "https://api.nexos.ai/v1"
+
         self.client = OpenAI(**kwargs)
 
     def complete(
@@ -53,4 +57,4 @@ class OpenAIProvider(LLMProvider):
             raise
 
     def get_model_name(self) -> str:
-        return f"openai/{self.config.model}"
+        return f"{self.config.provider}/{self.config.model}"
