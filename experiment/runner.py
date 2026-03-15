@@ -24,9 +24,7 @@ class ExperimentRunner:
         self.config.raw_data_dir.mkdir(parents=True, exist_ok=True)
         self.config.results_dir.mkdir(parents=True, exist_ok=True)
 
-        self.collector = MetricsCollector(
-            self.config.raw_data_dir, self.config.results_dir
-        )
+        self.collector = MetricsCollector(self.config.raw_data_dir)
 
         if self.config.runner_type == "api":
             from experiment.utils.api_runner import APIRunner
@@ -102,11 +100,13 @@ class ExperimentRunner:
         for condition in conditions:
             print(f"  Running {condition}...")
 
-            ctx = self.runner.create_fresh_context()
-
-            if condition == "treatment":
-                for skill_path in self.config.treatment_skills:
-                    self.runner.load_skill(ctx, skill_path)
+            # Load skills based on condition
+            skills = (
+                self.config.treatment_skills
+                if condition == "treatment"
+                else self.config.control_skills
+            )
+            ctx = self.runner.create_fresh_context(skills=skills)
 
             metrics_ctx = self.collector.start_run(
                 task.task_id,
@@ -186,8 +186,55 @@ class ExperimentRunner:
 
 
 def main():
-    """Entry point for experiment runner."""
-    runner = ExperimentRunner()
+    """Entry point for experiment runner with CLI argument parsing."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Run LLM experiment with Laws of Simplicity skill"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="anthropic/claude-3-5-sonnet-20241022",
+        help="Model string (e.g., 'nexos/claude-4-5-sonnet', 'anthropic/claude-3-5-sonnet-20241022')",
+    )
+    parser.add_argument(
+        "--benchmarks",
+        type=str,
+        nargs="+",
+        default=["swe_bench_lite"],
+        choices=["swe_bench_lite", "human_eval"],
+        help="Benchmarks to run",
+    )
+    parser.add_argument(
+        "--num-tasks", type=int, default=100, help="Number of tasks per benchmark"
+    )
+    parser.add_argument(
+        "--runner-type",
+        type=str,
+        default="api",
+        choices=["api", "cli"],
+        help="Runner type (api for direct API calls, cli for OpenCode)",
+    )
+    parser.add_argument(
+        "--temperature", type=float, default=0.0, help="LLM temperature"
+    )
+    parser.add_argument(
+        "--timeout", type=int, default=600, help="Timeout in seconds per task"
+    )
+
+    args = parser.parse_args()
+
+    config = ExperimentConfig(
+        benchmarks=args.benchmarks,
+        num_tasks_per_benchmark=args.num_tasks,
+        runner_type=args.runner_type,
+        model_string=args.model,
+        temperature=args.temperature,
+        timeout_seconds=args.timeout,
+    )
+
+    runner = ExperimentRunner(config)
     runner.run()
     analysis = runner.analyze()
 
