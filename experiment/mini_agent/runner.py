@@ -86,7 +86,10 @@ class MiniAgentRunner:
             model_kwargs=config["model"].get("model_kwargs", {}),
         )
 
-        env = LocalEnvironment()
+        import tempfile
+
+        workdir = tempfile.mkdtemp(prefix="mini_agent_")
+        env = LocalEnvironment(cwd=workdir)
 
         agent = DefaultAgent(
             model=model,
