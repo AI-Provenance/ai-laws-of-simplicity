@@ -16,12 +16,14 @@ class ExperimentConfig:
 
     runner_type: Literal["api", "cli"] = "api"
 
+    # API runner configuration
     model_string: str = "anthropic/claude-3-5-sonnet-20241022"
     temperature: float = 0.0
     max_tokens: int = 4096
     timeout_seconds: int = 600
 
-    agent_model: str = "opencode-go/glm-5"
+    # CLI runner configuration (only used when runner_type="cli")
+    agent_model: str | None = None
 
     conditions: tuple[str, str] = ("control", "treatment")
 

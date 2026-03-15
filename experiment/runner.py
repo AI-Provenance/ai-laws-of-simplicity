@@ -40,6 +40,9 @@ class ExperimentRunner:
         else:
             from experiment.utils.isolation import IsolatedRunner
 
+            if not self.config.agent_model:
+                raise ValueError("agent_model must be specified when runner_type='cli'")
+
             self.runner = IsolatedRunner(
                 agent_command=self.config.agent_model,
                 skills_dir=Path("skills"),
@@ -55,7 +58,17 @@ class ExperimentRunner:
 
     def run(self) -> None:
         """Run the full experiment."""
-        print(f"Starting experiment with config: {self.config}")
+        # Print relevant config info
+        print(f"Starting experiment:")
+        print(f"  Runner: {self.config.runner_type}")
+        if self.config.runner_type == "api":
+            print(f"  Model: {self.config.model_string}")
+            print(f"  Temperature: {self.config.temperature}")
+        else:
+            print(f"  Agent: {self.config.agent_model}")
+        print(f"  Benchmarks: {', '.join(self.config.benchmarks)}")
+        print(f"  Tasks per benchmark: {self.config.num_tasks_per_benchmark}")
+        print(f"  Conditions: {', '.join(self.config.conditions)}")
 
         for benchmark_name in self.config.benchmarks:
             print(f"\n=== Running {benchmark_name} ===")
