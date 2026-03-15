@@ -150,6 +150,7 @@ def test_run_agent_success(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         result = runner.run_agent(ctx, "Test task", timeout=600)
 
@@ -203,6 +204,7 @@ def test_run_agent_step_limit(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         result = runner.run_agent(ctx, "Test task")
 
@@ -287,6 +289,7 @@ def test_run_agent_saves_trajectory(runner_with_output_dir):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         runner_with_output_dir.run_agent(ctx, "Test task")
 
@@ -328,6 +331,7 @@ def test_run_agent_no_save_without_output_dir(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         runner.run_agent(ctx, "Test task")
 
@@ -369,6 +373,7 @@ def test_run_agent_timeout_parameter(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         runner.run_agent(ctx, "Test task", timeout=300)
 
@@ -401,6 +406,7 @@ def test_run_agent_max_tokens_parameter(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         runner.run_agent(ctx, "Test task", max_tokens=8000)
 
@@ -436,6 +442,7 @@ def test_run_agent_creates_correct_agent_config(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         runner.run_agent(ctx, "Test task")
 
@@ -478,6 +485,7 @@ def test_run_agent_timing(runner):
 
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         result = runner.run_agent(ctx, "Test task")
 
@@ -518,6 +526,7 @@ def test_result_structure_complete(runner):
     ):
         mock_agent_instance = MockAgent.return_value
         mock_agent_instance.run.return_value = mock_result
+        mock_agent_instance.serialize.return_value = mock_result
 
         result = runner.run_agent(ctx, "Test task")
 

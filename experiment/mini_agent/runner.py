@@ -103,10 +103,10 @@ class MiniAgentRunner:
         start_time = time.time()
 
         try:
-            result = agent.run(task=task_prompt)
+            agent.run(task=task_prompt)
             elapsed = time.time() - start_time
 
-            metrics = parse_run_result(result)
+            metrics = parse_run_result(agent.serialize())
 
             if self.output_dir:
                 traj_dir = self.output_dir / "trajectories"
