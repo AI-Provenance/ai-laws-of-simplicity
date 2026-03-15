@@ -276,19 +276,37 @@ def main():
     analysis = runner.analyze()
 
     print("\n=== Analysis Summary ===")
-    print(f"Token reduction: {analysis['token_analysis']['mean_diff']:.0f} tokens")
-    print(f"  Control: {analysis['token_analysis']['mean_control']:.0f}")
-    print(f"  Treatment: {analysis['token_analysis']['mean_treatment']:.0f}")
+
+    # Primary Metric: Wall-Clock Time-to-Completion
+    time_diff = (
+        analysis["time_analysis"]["median_treatment"]
+        - analysis["time_analysis"]["median_control"]
+    )
+    time_pct = (time_diff / analysis["time_analysis"]["median_control"]) * 100
+    print(f"⏱️  Time-to-Completion (PRIMARY METRIC):")
+    print(f"  Control:   {analysis['time_analysis']['median_control']:.1f}s (median)")
+    print(f"  Treatment: {analysis['time_analysis']['median_treatment']:.1f}s (median)")
+    print(f"  Difference: {time_diff:+.1f}s ({time_pct:+.1f}%)")
+    print(f"  Effect size: {analysis['time_analysis']['effect_size']:.3f}")
+
+    # Secondary Metric: Token Usage (cost)
+    token_diff = analysis["token_analysis"]["mean_diff"]
+    token_pct = (token_diff / analysis["token_analysis"]["mean_control"]) * 100
+    print(f"\n💰 Token Usage (cost proxy):")
+    print(
+        f"  Control:   {analysis['token_analysis']['mean_control']:.0f} tokens (mean)"
+    )
+    print(
+        f"  Treatment: {analysis['token_analysis']['mean_treatment']:.0f} tokens (mean)"
+    )
+    print(f"  Difference: {token_diff:+.0f} tokens ({token_pct:+.1f}%)")
     print(f"  p-value: {analysis['token_analysis']['p_value']:.4f}")
     print(f"  Cohen's d: {analysis['token_analysis']['cohens_d']:.3f}")
 
-    print(f"\nSuccess rate:")
-    print(f"  Control: {analysis['success_analysis']['rate_control']:.2%}")
-    print(f"  Treatment: {analysis['success_analysis']['rate_treatment']:.2%}")
-
-    print(f"\nTime (median):")
-    print(f"  Control: {analysis['time_analysis']['median_control']:.1f}s")
-    print(f"  Treatment: {analysis['time_analysis']['median_treatment']:.1f}s")
+    # Quality Metric: Success Rate
+    print(f"\n✅ Success Rate:")
+    print(f"  Control:   {analysis['success_analysis']['rate_control']:.1%}")
+    print(f"  Treatment: {analysis['success_analysis']['rate_treatment']:.1%}")
 
     with open(runner.config.results_dir / "analysis.json", "w") as f:
         json.dump(analysis, f, indent=2)
