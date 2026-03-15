@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +69,9 @@ def build_config(
     if model_name.startswith("nexos/"):
         litellm_model_name = f"openai/{model_name.split('/', 1)[1]}"
         model_kwargs["api_base"] = "https://api.nexos.ai/v1"
+        nexos_key = os.environ.get("NEXOS_API_KEY")
+        if nexos_key:
+            model_kwargs["api_key"] = nexos_key
 
     return {
         "agent": {
