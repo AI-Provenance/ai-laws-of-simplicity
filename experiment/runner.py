@@ -1,0 +1,199 @@
+# experiment/runner.py
+import json
+from pathlib import Path
+from typing import Any
+
+from experiment.config import DEFAULT_CONFIG, ExperimentConfig
+from experiment.harness.base import TaskSpec
+from experiment.harness.humaneval import HumanEvalHarness
+from experiment.harness.swe_bench import SWEBenchHarness
+from experiment.metrics.collector import MetricsCollector
+from experiment.utils.isolation import IsolatedRunner
+
+
+class ExperimentRunner:
+    """Orchestrates A/B experiments across benchmarks."""
+
+    def __init__(self, config: ExperimentConfig | None = None):
+        """Initialize experiment runner.
+
+        Args:
+            config: Experiment configuration (uses default if not provided)
+        """
+        self.config = config or DEFAULT_CONFIG
+        self.config.raw_data_dir.mkdir(parents=True, exist_ok=True)
+        self.config.results_dir.mkdir(parents=True, exist_ok=True)
+
+        self.harnesses: dict[str, Any] = {}
+        if "swe_bench_lite" in self.config.benchmarks:
+            self.harnesses["swe_bench_lite"] = SWEBenchHarness()
+        if "human_eval" in self.config.benchmarks:
+            self.harnesses["human_eval"] = HumanEvalHarness()
+
+        self.runner = IsolatedRunner(
+            agent_command="opencode",
+            skills_dir=Path("skills"),
+        )
+        self.collector = MetricsCollector(self.config.raw_data_dir)
+
+        self.task_metadata: dict[str, dict[str, Any]] = {}
+
+    def run(self) -> None:
+        """Run the full experiment."""
+        print(f"Starting experiment with config: {self.config}")
+
+        for benchmark_name in self.config.benchmarks:
+            print(f"\n=== Running {benchmark_name} ===")
+            harness = self.harnesses[benchmark_name]
+
+            tasks = harness.load_tasks(
+                self.config.num_tasks_per_benchmark,
+                self.config.random_seed,
+            )
+            print(f"Loaded {len(tasks)} tasks")
+
+            for task in tasks:
+                self.task_metadata[task.task_id] = {
+                    "benchmark": task.benchmark,
+                    "difficulty": task.difficulty,
+                }
+
+            for i, task in enumerate(tasks, 1):
+                print(f"\n[{i}/{len(tasks)}] Task: {task.task_id}")
+                self._run_task(task, harness)
+
+        print("\n=== Aggregating results ===")
+        self.collector.to_csv(self.config.results_dir / "aggregate_results.csv")
+
+        with open(self.config.results_dir / "task_metadata.json", "w") as f:
+            json.dump(self.task_metadata, f, indent=2)
+
+        print(f"Results saved to {self.config.results_dir}")
+
+    def _run_task(self, task: TaskSpec, harness: Any) -> None:
+        """Run a single task in both conditions.
+
+        Uses counterbalanced design: hash(task_id) % 2 determines condition order.
+        """
+        if hash(task.task_id) % 2 == 0:
+            conditions = ["control", "treatment"]
+        else:
+            conditions = ["treatment", "control"]
+
+        solution_paths = {}
+
+        for condition in conditions:
+            print(f"  Running {condition}...")
+
+            ctx = self.runner.create_fresh_context()
+
+            if condition == "treatment":
+                for skill_path in self.config.treatment_skills:
+                    self.runner.load_skill(ctx, skill_path)
+
+            metrics_ctx = self.collector.start_run(
+                task.task_id,
+                task.benchmark,
+                condition,
+            )
+
+            try:
+                result = self.runner.run_agent(
+                    ctx,
+                    task.prompt,
+                    timeout=self.config.timeout_seconds,
+                )
+
+                self.collector.update_tokens(
+                    metrics_ctx,
+                    result["input_tokens"],
+                    result["output_tokens"],
+                )
+                for _ in range(result["iterations"]):
+                    self.collector.increment_iteration(metrics_ctx)
+
+                output_dir = Path(ctx["temp_dir"]) / "output"
+                output_dir.mkdir(exist_ok=True)
+                solution_path = output_dir / "solution"
+                solution_path.write_text(result["output"])
+                solution_paths[condition] = solution_path
+
+                try:
+                    success = harness.verify_solution(task, solution_path)
+                except Exception as verify_error:
+                    print(f"  Verification error: {verify_error}")
+                    success = False
+
+                self.collector.end_run(metrics_ctx, success=success)
+
+            except Exception as e:
+                print(f"  ERROR: {e}")
+                self.collector.end_run(metrics_ctx, success=False, error=str(e))
+
+            finally:
+                self.runner.cleanup(ctx)
+
+    def analyze(self) -> dict[str, Any]:
+        """Run statistical analysis on collected results."""
+        from experiment.metrics.analyzer import run_full_analysis
+
+        results_csv = self.config.results_dir / "aggregate_results.csv"
+        metadata_json = self.config.results_dir / "task_metadata.json"
+
+        with open(metadata_json) as f:
+            metadata = json.load(f)
+
+        results = run_full_analysis(results_csv, metadata)
+
+        return {
+            "token_analysis": {
+                "mean_control": results.token_mean_control,
+                "mean_treatment": results.token_mean_treatment,
+                "mean_diff": results.token_mean_diff,
+                "p_value": results.token_p_value,
+                "cohens_d": results.token_cohens_d,
+                "ci_95": [results.token_ci_lower, results.token_ci_upper],
+            },
+            "success_analysis": {
+                "rate_control": results.success_rate_control,
+                "rate_treatment": results.success_rate_treatment,
+                "p_value": results.success_p_value,
+            },
+            "difficulty_analysis": results.token_diff_by_difficulty,
+            "time_analysis": {
+                "median_control": results.time_median_control,
+                "median_treatment": results.time_median_treatment,
+                "effect_size": results.time_effect_size,
+            },
+        }
+
+
+def main():
+    """Entry point for experiment runner."""
+    runner = ExperimentRunner()
+    runner.run()
+    analysis = runner.analyze()
+
+    print("\n=== Analysis Summary ===")
+    print(f"Token reduction: {analysis['token_analysis']['mean_diff']:.0f} tokens")
+    print(f"  Control: {analysis['token_analysis']['mean_control']:.0f}")
+    print(f"  Treatment: {analysis['token_analysis']['mean_treatment']:.0f}")
+    print(f"  p-value: {analysis['token_analysis']['p_value']:.4f}")
+    print(f"  Cohen's d: {analysis['token_analysis']['cohens_d']:.3f}")
+
+    print(f"\nSuccess rate:")
+    print(f"  Control: {analysis['success_analysis']['rate_control']:.2%}")
+    print(f"  Treatment: {analysis['success_analysis']['rate_treatment']:.2%}")
+
+    print(f"\nTime (median):")
+    print(f"  Control: {analysis['time_analysis']['median_control']:.1f}s")
+    print(f"  Treatment: {analysis['time_analysis']['median_treatment']:.1f}s")
+
+    with open(runner.config.results_dir / "analysis.json", "w") as f:
+        json.dump(analysis, f, indent=2)
+
+    print(f"\nFull analysis saved to {runner.config.results_dir / 'analysis.json'}")
+
+
+if __name__ == "__main__":
+    main()
