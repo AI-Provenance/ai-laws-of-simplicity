@@ -1,0 +1,115 @@
+experiment/harness/base.py
+  85d969d332c0ca7f 1-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.11",
+  "base_commit_sha": "ae304513697624017e87c5e0eade539c79bfd5be",
+  "prompts": {
+    "85d969d332c0ca7f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_30ecfd8bcffeeyF5V7vAUMhpiQ",
+        "model": "opencode-go/glm-5"
+      },
+      "human_author": "Shahriyar Rzayev <rzayev.sehriyar@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "You are implementing Task 2.1: Create Abstract Benchmark Harness\n\n## Task Description\n\n**Files:**\n- Create: `experiment/harness/base.py`\n\n- [ ] **Step 1: Write base class interface**\n\n```python\n# experiment/harness/base.py\nfrom abc import ABC, abstractmethod\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any\n\n\n@dataclass\nclass TaskResult:\n    \"\"\"Result from running a single task.\"\"\"\n    \n    task_id: str\n    benchmark: str\n    condition: str  # \"control\" or \"treatment\"\n    \n    # Token metrics\n    input_tokens: int\n    output_tokens: int\n    total_tokens: int\n    \n    # Secondary metrics\n    success: bool\n    time_seconds: float\n    iterations: int\n    \n    # Metadata\n    error: str | None = None\n    output_files: list[Path] | None = None\n\n\n@dataclass\nclass TaskSpec:\n    \"\"\"Specification for a benchmark task.\"\"\"\n    \n    task_id: str\n    benchmark: str\n    prompt: str\n    test_file: Path | None\n    expected_solution: str | None\n    difficulty: str  # \"simple\", \"medium\", \"complex\"\n    \n    # SWE-bench specific\n    repo: str | None = None\n    base_commit: str | None = None\n    problem_statement: str | None = None\n    \n    # HumanEval specific\n    function_signature: str | None = None\n    test_cases: list[str] | None = None\n\n\nclass BenchmarkHarness(ABC):\n    \"\"\"Abstract base class for benchmark harnesses.\"\"\"\n    \n    @abstractmethod\n    def load_tasks(self, num_tasks: int, seed: int) -> list[TaskSpec]:\n        \"\"\"Load a random sample of tasks from the benchmark.\n        \n        Args:\n            num_tasks: Number of tasks to sample\n            seed: Random seed for reproducibility\n            \n        Returns:\n            List of TaskSpec objects\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def verify_solution(self, task: TaskSpec, solution_path: Path) -> bool:\n        \"\"\"Verify that a solution passes the task's tests.\n        \n        Args:\n            task: Task specification\n            solution_path: Path to generated solution\n            \n        Returns:\n            True if solution passes all tests\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def get_task_metadata(self, task_id: str) -> dict[str, Any]:\n        \"\"\"Get metadata for a specific task.\n        \n        Args:\n            task_id: Task identifier\n            \n        Returns:\n            Dictionary with task metadata (difficulty, lines_changed, etc.)\n        \"\"\"\n        pass\n```\n\n- [ ] **Step 2: Verify base.py imports correctly**\n\n```bash\npython -c \"from experiment.harness.base import BenchmarkHarness, TaskResult, TaskSpec; print('OK')\"\n```\n\nExpected: `OK`\n\n- [ ] **Step 3: Commit base class**\n\n```bash\ngit add experiment/harness/base.py\ngit commit -m \"feat: add abstract benchmark harness base class\"\n```\n\n## Context\n\nThis is the second task in building the experiment runner. The base harness defines the interface that SWE-bench and HumanEval harnesses will implement. It provides:\n- TaskResult: Metrics from running a single task (tokens, time, success)\n- TaskSpec: Task definition with benchmark-specific fields\n- BenchmarkHarness: Abstract interface for loading tasks and verifying solutions\n\nWork from: /home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity\n\n## Your Job\n\nOnce you're clear on requirements:\n1. Implement exactly what the task specifies\n2. Verify implementation works\n3. Commit your work\n4. Report back with status DONE",
+          "timestamp": "2026-03-15T11:09:50.791+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "ls -la experiment/",
+            "description": "Check experiment directory structure"
+          },
+          "timestamp": "2026-03-15T11:09:50.794+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "ls -la experiment/harness/ 2>/dev/null || echo \"harness directory doesn't exist\"",
+            "description": "Check if harness directory exists"
+          },
+          "timestamp": "2026-03-15T11:09:50.794+00:00"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll implement Task 2.1 to create the abstract benchmark harness. Let me start by checking the directory structure and creatingthe file.",
+          "timestamp": "2026-03-15T11:09:50.794+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "write",
+          "input": {
+            "content": "from abc import ABC, abstractmethod\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any\n\n\n@dataclass\nclass TaskResult:\n    \"\"\"Result from running a single task.\"\"\"\n    \n    task_id: str\n    benchmark: str\n    condition: str  # \"control\" or \"treatment\"\n    \n    # Token metrics\n    input_tokens: int\n    output_tokens: int\n    total_tokens: int\n    \n    # Secondary metrics\n    success: bool\n    time_seconds: float\n    iterations: int\n    \n    # Metadata\n    error: str | None = None\n    output_files: list[Path] | None = None\n\n\n@dataclass\nclass TaskSpec:\n    \"\"\"Specification for a benchmark task.\"\"\"\n    \n    task_id: str\n    benchmark: str\n    prompt: str\n    test_file: Path | None\n    expected_solution: str | None\n    difficulty: str  # \"simple\", \"medium\", \"complex\"\n    \n    # SWE-bench specific\n    repo: str | None = None\n    base_commit: str | None = None\n    problem_statement: str | None = None\n    \n    # HumanEval specific\n    function_signature: str | None = None\n    test_cases: list[str] | None = None\n\n\nclass BenchmarkHarness(ABC):\n    \"\"\"Abstract base class for benchmark harnesses.\"\"\"\n    \n    @abstractmethod\n    def load_tasks(self, num_tasks: int, seed: int) -> list[TaskSpec]:\n        \"\"\"Load a random sample of tasks from the benchmark.\n        \n        Args:\n            num_tasks: Number of tasks to sample\n            seed: Random seed for reproducibility\n            \n        Returns:\n            List of TaskSpec objects\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def verify_solution(self, task: TaskSpec, solution_path: Path) -> bool:\n        \"\"\"Verify that a solution passes the task's tests.\n        \n        Args:\n            task: Task specification\n            solution_path: Path to generated solution\n            \n        Returns:\n            True if solution passes all tests\n        \"\"\"\n        pass\n    \n    @abstractmethod\n    def get_task_metadata(self, task_id: str) -> dict[str, Any]:\n        \"\"\"Get metadata for a specific task.\n        \n        Args:\n            task_id: Task identifier\n            \n        Returns:\n            Dictionary with task metadata (difficulty, lines_changed, etc.)\n        \"\"\"\n        pass",
+            "filePath": "/home/shako/REPOS/Indie-Hacking/ai-laws-of-simplicity/experiment/harness/base.py"
+          },
+          "timestamp": "2026-03-15T11:09:56.432+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "python -c \"from experiment.harness.base import BenchmarkHarness, TaskResult, TaskSpec; print('OK')\"",
+            "description": "Verify imports work correctly"
+          },
+          "timestamp": "2026-03-15T11:10:10.204+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "python3 -c \"from experiment.harness.base import BenchmarkHarness, TaskResult, TaskSpec; print('OK')\"",
+            "description": "Verify imports work correctly"
+          },
+          "timestamp": "2026-03-15T11:10:12.375+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git status",
+            "description": "Check git status"
+          },
+          "timestamp": "2026-03-15T11:10:14.545+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git diff experiment/harness/base.py",
+            "description": "Check changes to base.py"
+          },
+          "timestamp": "2026-03-15T11:10:14.545+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git log -3 --oneline",
+            "description": "Check recent commits"
+          },
+          "timestamp": "2026-03-15T11:10:14.545+00:00"
+        },
+        {
+          "type": "tool_use",
+          "name": "bash",
+          "input": {
+            "command": "git add experiment/harness/base.py && git commit -m \"feat: add abstract benchmark harness base class\"",
+            "description": "Add and commit base.py"
+          },
+          "timestamp": "2026-03-15T11:10:17.924+00:00"
+        }
+      ],
+      "total_additions": 90,
+      "total_deletions": 0,
+      "accepted_lines": 90,
+      "overriden_lines": 0
+    }
+  }
+}
