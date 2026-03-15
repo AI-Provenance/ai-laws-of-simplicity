@@ -100,13 +100,28 @@ class ExperimentRunner:
         for condition in conditions:
             print(f"  Running {condition}...")
 
-            # Load skills based on condition
-            skills = (
-                self.config.treatment_skills
-                if condition == "treatment"
-                else self.config.control_skills
-            )
-            ctx = self.runner.create_fresh_context(skills=skills)
+            # Create context and load skills based on runner type
+            if self.config.runner_type == "api":
+                # API runner: pass skills to create_fresh_context
+                skills = (
+                    self.config.treatment_skills
+                    if condition == "treatment"
+                    else self.config.control_skills
+                )
+                # Type assertion for API runner
+                from experiment.utils.api_runner import APIRunner
+
+                assert isinstance(self.runner, APIRunner)
+                ctx = self.runner.create_fresh_context(skills=skills)
+            else:
+                # CLI runner (IsolatedRunner)
+                from experiment.utils.isolation import IsolatedRunner
+
+                assert isinstance(self.runner, IsolatedRunner)
+                ctx = self.runner.create_fresh_context()
+                if condition == "treatment":
+                    for skill_path in self.config.treatment_skills:
+                        self.runner.load_skill(ctx, skill_path)
 
             metrics_ctx = self.collector.start_run(
                 task.task_id,
@@ -129,10 +144,15 @@ class ExperimentRunner:
                 for _ in range(result["iterations"]):
                     self.collector.increment_iteration(metrics_ctx)
 
-                output_dir = Path(ctx["temp_dir"]) / "output"
-                output_dir.mkdir(exist_ok=True)
-                solution_path = output_dir / "solution"
-                solution_path.write_text(result["output"])
+                # For verification, write solution to temp file
+                import tempfile
+
+                with tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".txt", delete=False
+                ) as f:
+                    f.write(result["output"])
+                    solution_path = Path(f.name)
+
                 solution_paths[condition] = solution_path
 
                 try:
@@ -140,6 +160,10 @@ class ExperimentRunner:
                 except Exception as verify_error:
                     print(f"  Verification error: {verify_error}")
                     success = False
+                finally:
+                    # Clean up temp file
+                    if solution_path.exists():
+                        solution_path.unlink()
 
                 self.collector.end_run(metrics_ctx, success=success)
 
