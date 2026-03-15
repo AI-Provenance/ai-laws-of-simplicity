@@ -37,7 +37,7 @@ class ExperimentRunner:
                 timeout=self.config.timeout_seconds,
             )
             self.runner = APIRunner(model_config)
-        else:
+        elif self.config.runner_type == "cli":
             from experiment.utils.isolation import IsolatedRunner
 
             if not self.config.agent_model:
@@ -46,6 +46,21 @@ class ExperimentRunner:
             self.runner = IsolatedRunner(
                 agent_command=self.config.agent_model,
                 skills_dir=Path("skills"),
+            )
+        elif self.config.runner_type == "mini_agent":
+            from experiment.mini_agent.runner import MiniAgentRunner
+            from experiment.providers import ModelConfig
+
+            model_config = ModelConfig.from_string(self.config.model_string)
+            # Convert to litellm model name format
+            litellm_model = f"{model_config.provider}/{model_config.model}"
+
+            self.runner = MiniAgentRunner(
+                model_name=litellm_model,
+                step_limit=self.config.step_limit,
+                cost_limit=self.config.cost_limit,
+                temperature=self.config.temperature,
+                output_dir=self.config.raw_data_dir,
             )
 
         self.harnesses: dict[str, Any] = {}
@@ -61,10 +76,13 @@ class ExperimentRunner:
         # Print relevant config info
         print(f"Starting experiment:")
         print(f"  Runner: {self.config.runner_type}")
-        if self.config.runner_type == "api":
+        if self.config.runner_type in ("api", "mini_agent"):
             print(f"  Model: {self.config.model_string}")
             print(f"  Temperature: {self.config.temperature}")
-        else:
+        if self.config.runner_type == "mini_agent":
+            print(f"  Step limit: {self.config.step_limit}")
+            print(f"  Cost limit: ${self.config.cost_limit}")
+        if self.config.runner_type == "cli":
             print(f"  Agent: {self.config.agent_model}")
         print(f"  Benchmarks: {', '.join(self.config.benchmarks)}")
         print(f"  Tasks per benchmark: {self.config.num_tasks_per_benchmark}")
@@ -250,8 +268,8 @@ def main():
         "--runner-type",
         type=str,
         default="api",
-        choices=["api", "cli"],
-        help="Runner type (api for direct API calls, cli for OpenCode)",
+        choices=["api", "cli", "mini_agent"],
+        help="Runner type (api for direct API calls, cli for OpenCode, mini_agent for mini-swe-agent)",
     )
     parser.add_argument(
         "--temperature", type=float, default=0.0, help="LLM temperature"

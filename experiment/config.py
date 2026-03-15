@@ -14,7 +14,7 @@ class ExperimentConfig:
     benchmarks: list[Literal["swe_bench_lite", "human_eval"]]
     num_tasks_per_benchmark: int = 100
 
-    runner_type: Literal["api", "cli"] = "api"
+    runner_type: Literal["api", "cli", "mini_agent"] = "api"
 
     # API runner configuration
     model_string: str = "anthropic/claude-3-5-sonnet-20241022"
@@ -24,6 +24,10 @@ class ExperimentConfig:
 
     # CLI runner configuration (only used when runner_type="cli")
     agent_model: str | None = None
+
+    # mini-swe-agent configuration (only used when runner_type="mini_agent")
+    step_limit: int = 50
+    cost_limit: float = 3.0
 
     conditions: tuple[str, str] = ("control", "treatment")
 
