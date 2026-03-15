@@ -24,17 +24,34 @@ class ExperimentRunner:
         self.config.raw_data_dir.mkdir(parents=True, exist_ok=True)
         self.config.results_dir.mkdir(parents=True, exist_ok=True)
 
+        self.collector = MetricsCollector(
+            self.config.raw_data_dir, self.config.results_dir
+        )
+
+        if self.config.runner_type == "api":
+            from experiment.utils.api_runner import APIRunner
+            from experiment.providers import ModelConfig
+
+            model_config = ModelConfig.from_string(
+                self.config.model_string,
+                temperature=self.config.temperature,
+                max_tokens=self.config.max_tokens,
+                timeout=self.config.timeout_seconds,
+            )
+            self.runner = APIRunner(model_config)
+        else:
+            from experiment.utils.isolation import IsolatedRunner
+
+            self.runner = IsolatedRunner(
+                agent_command=self.config.agent_model,
+                skills_dir=Path("skills"),
+            )
+
         self.harnesses: dict[str, Any] = {}
         if "swe_bench_lite" in self.config.benchmarks:
             self.harnesses["swe_bench_lite"] = SWEBenchHarness()
         if "human_eval" in self.config.benchmarks:
             self.harnesses["human_eval"] = HumanEvalHarness()
-
-        self.runner = IsolatedRunner(
-            agent_command="opencode",
-            skills_dir=Path("skills"),
-        )
-        self.collector = MetricsCollector(self.config.raw_data_dir)
 
         self.task_metadata: dict[str, dict[str, Any]] = {}
 

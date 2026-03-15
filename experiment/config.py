@@ -14,9 +14,14 @@ class ExperimentConfig:
     benchmarks: list[Literal["swe_bench_lite", "human_eval"]]
     num_tasks_per_benchmark: int = 100
 
-    agent_model: str = "opencode-go/glm-5"
+    runner_type: Literal["api", "cli"] = "api"
+
+    model_string: str = "anthropic/claude-3-5-sonnet-20241022"
     temperature: float = 0.0
+    max_tokens: int = 4096
     timeout_seconds: int = 600
+
+    agent_model: str = "opencode-go/glm-5"
 
     conditions: tuple[str, str] = ("control", "treatment")
 
@@ -29,10 +34,14 @@ class ExperimentConfig:
     results_dir: Path = Path("data/results")
 
     random_seed: int = 42
-    counterbalance: bool = True  # Randomize condition order via hash(task_id) % 2
+    counterbalance: bool = True
 
-    required_sample_size: int = 90  # Minimum for statistical power
-    planned_sample_size: int = 100  # With 10% buffer
+    required_sample_size: int = 90
+    planned_sample_size: int = 100
 
 
-DEFAULT_CONFIG = ExperimentConfig(benchmarks=["swe_bench_lite", "human_eval"])
+DEFAULT_CONFIG = ExperimentConfig(
+    benchmarks=["swe_bench_lite"],
+    runner_type="api",
+    model_string="anthropic/claude-3-5-sonnet-20241022",
+)
