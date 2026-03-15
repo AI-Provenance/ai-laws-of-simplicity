@@ -132,17 +132,13 @@ class ExperimentRunner:
             print(f"  Running {condition}...")
 
             # Create context and load skills based on runner type
-            if self.config.runner_type == "api":
-                # API runner: pass skills to create_fresh_context
+            if self.config.runner_type in ("api", "mini_agent"):
+                # API and mini_agent runners: pass skills to create_fresh_context
                 skills = (
                     self.config.treatment_skills
                     if condition == "treatment"
                     else self.config.control_skills
                 )
-                # Type assertion for API runner
-                from experiment.utils.api_runner import APIRunner
-
-                assert isinstance(self.runner, APIRunner)
                 ctx = self.runner.create_fresh_context(skills=skills)
             else:
                 # CLI runner (IsolatedRunner)
