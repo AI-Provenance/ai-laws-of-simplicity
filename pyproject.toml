@@ -21,8 +21,16 @@ dependencies = [
     "seaborn>=0.12.0",
 ]
 
+[tool.setuptools]
+packages = ["experiment"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]
