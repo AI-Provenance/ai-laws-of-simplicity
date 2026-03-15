@@ -291,7 +291,7 @@ def test_run_agent_saves_trajectory(runner_with_output_dir):
         runner_with_output_dir.run_agent(ctx, "Test task")
 
         mock_agent_instance.save.assert_called_once_with(
-            str(runner_with_output_dir.output_dir)
+            runner_with_output_dir.output_dir
         )
 
 

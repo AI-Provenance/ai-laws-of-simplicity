@@ -72,9 +72,12 @@ class MiniAgentRunner:
         Returns:
             Dict with input_tokens, output_tokens, output, iterations, etc.
         """
+        import os
         from minisweagent.agents.default import DefaultAgent
         from minisweagent.models.litellm_model import LitellmModel
         from minisweagent.environments.local import LocalEnvironment
+
+        os.environ.setdefault("MSWEA_COST_TRACKING", "ignore_errors")
 
         config = ctx["config"]
 
@@ -103,7 +106,7 @@ class MiniAgentRunner:
             metrics = parse_run_result(result)
 
             if self.output_dir:
-                agent.save(str(self.output_dir))
+                agent.save(self.output_dir)
 
             return {
                 "input_tokens": metrics["input_tokens"],
