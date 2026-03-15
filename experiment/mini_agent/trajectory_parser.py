@@ -1,4 +1,16 @@
+import json
+from pathlib import Path
 from typing import Any
+
+
+_DEFAULT_PARSED_RESULT = {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "num_turns": 0,
+    "cost": 0.0,
+    "exit_status": "not_found",
+    "patch": "",
+}
 
 
 def parse_run_result(result: dict[str, Any]) -> dict[str, Any]:
@@ -38,19 +50,9 @@ def parse_serialized_trajectory(trajectory_path: str) -> dict[str, Any]:
     Returns:
         Same format as parse_run_result
     """
-    import json
-    from pathlib import Path
-
     path = Path(trajectory_path)
     if not path.exists():
-        return {
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "num_turns": 0,
-            "cost": 0.0,
-            "exit_status": "not_found",
-            "patch": "",
-        }
+        return _DEFAULT_PARSED_RESULT.copy()
 
     with open(path) as f:
         data = json.load(f)
