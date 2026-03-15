@@ -54,6 +54,10 @@ def build_config(
 
     Returns:
         Config dict suitable for mini-swe-agent
+
+    Note:
+        The /testbed path is the default working directory used by mini-swe-agent
+        Docker containers for isolated task execution.
     """
     system_template = BASE_SYSTEM_TEMPLATE
     if skill_content:
@@ -77,7 +81,7 @@ def build_config(
                 "PIP_PROGRESS_BAR": "off",
                 "TQDM_DISABLE": "1",
             },
-            "environment_class": "docker",
+            "environment_class": "docker",  # Required for mini-swe-agent isolation
         },
         "model": {
             "model_name": model_name,
@@ -102,6 +106,21 @@ def build_treatment_config(
     skill_path: Path,
     **kwargs,
 ) -> dict[str, Any]:
-    """Build config for treatment condition (with skill)."""
+    """Build config for treatment condition (with skill).
+
+    Args:
+        model_name: LiteLLM model name
+        skill_path: Path to skill file to load
+        **kwargs: Additional arguments passed to build_config
+
+    Returns:
+        Config dict with skill content prepended to system template
+
+    Raises:
+        FileNotFoundError: If skill_path does not exist
+    """
+    if not skill_path.exists():
+        raise FileNotFoundError(f"Skill file not found: {skill_path}")
+
     skill_content = skill_path.read_text()
     return build_config(model_name, skill_content=skill_content, **kwargs)

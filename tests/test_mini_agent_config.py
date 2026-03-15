@@ -140,18 +140,19 @@ def test_config_structure_consistency():
         Path(__file__).parent.parent / "skills" / "laws-of-simplicity" / "SKILL.md"
     )
 
-    if skill_file.exists():
-        control = build_control_config("test/model")
-        treatment = build_treatment_config("test/model", skill_file)
+    if not skill_file.exists():
+        pytest.skip(f"Skill file not found: {skill_file}")
 
-        assert control.keys() == treatment.keys()
-        assert control["agent"].keys() == treatment["agent"].keys()
-        assert control["environment"] == treatment["environment"]
-        assert control["model"]["model_name"] == treatment["model"]["model_name"]
-        assert (
-            control["agent"]["instance_template"]
-            == treatment["agent"]["instance_template"]
-        )
+    control = build_control_config("test/model")
+    treatment = build_treatment_config("test/model", skill_file)
+
+    assert control.keys() == treatment.keys()
+    assert control["agent"].keys() == treatment["agent"].keys()
+    assert control["environment"] == treatment["environment"]
+    assert control["model"]["model_name"] == treatment["model"]["model_name"]
+    assert (
+        control["agent"]["instance_template"] == treatment["agent"]["instance_template"]
+    )
 
 
 def test_skill_content_stripping(tmp_path):
@@ -165,3 +166,11 @@ def test_skill_content_stripping(tmp_path):
     assert system_template.startswith("Test skill with whitespace")
     assert not system_template.startswith("\n")
     assert not system_template.startswith(" ")
+
+
+def test_build_treatment_config_missing_file(tmp_path):
+    """Test build_treatment_config raises FileNotFoundError for missing file."""
+    nonexistent_file = tmp_path / "nonexistent.md"
+
+    with pytest.raises(FileNotFoundError, match="Skill file not found"):
+        build_treatment_config("test/model", nonexistent_file)
