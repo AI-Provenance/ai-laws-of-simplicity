@@ -307,6 +307,23 @@ def main():
     print(f"  Difference: {time_diff:+.1f}s ({time_pct:+.1f}%)")
     print(f"  Effect size: {analysis['time_analysis']['effect_size']:.3f}")
 
+    # If mini_agent runner, show turns metric
+    if args.runner_type == "mini_agent":
+        import pandas as pd
+
+        results_csv = config.results_dir / "aggregate_results.csv"
+        if results_csv.exists():
+            df = pd.read_csv(results_csv)
+            if "iterations" in df.columns:
+                ctrl = df[df["condition"] == "control"]["iterations"]
+                treat = df[df["condition"] == "treatment"]["iterations"]
+                print(f"\n🔄 Turns per Task:")
+                print(f"  Control:   {ctrl.mean():.1f} turns (mean)")
+                print(f"  Treatment: {treat.mean():.1f} turns (mean)")
+                diff = treat.mean() - ctrl.mean()
+                pct = (diff / ctrl.mean()) * 100 if ctrl.mean() > 0 else 0
+                print(f"  Difference: {diff:+.1f} turns ({pct:+.1f}%)")
+
     # Secondary Metric: Token Usage (cost)
     token_diff = analysis["token_analysis"]["mean_diff"]
     token_pct = (token_diff / analysis["token_analysis"]["mean_control"]) * 100
