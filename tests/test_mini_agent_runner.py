@@ -292,7 +292,7 @@ def test_run_agent_saves_trajectory(runner_with_output_dir):
 
         mock_agent_instance.save.assert_called_once()
         save_path = mock_agent_instance.save.call_args[0][0]
-        assert save_path.parent == runner_with_output_dir.output_dir
+        assert save_path.parent == runner_with_output_dir.output_dir / "trajectories"
         assert save_path.suffix == ".json"
 
 

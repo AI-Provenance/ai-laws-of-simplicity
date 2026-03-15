@@ -109,9 +109,11 @@ class MiniAgentRunner:
             metrics = parse_run_result(result)
 
             if self.output_dir:
+                traj_dir = self.output_dir / "trajectories"
+                traj_dir.mkdir(parents=True, exist_ok=True)
                 task_id = task_prompt[:80].replace("/", "_").replace(" ", "_")
                 condition = "treatment" if ctx.get("skill_content") else "control"
-                trajectory_file = self.output_dir / f"{task_id}_{condition}.json"
+                trajectory_file = traj_dir / f"{task_id}_{condition}.json"
                 agent.save(trajectory_file)
 
             return {
