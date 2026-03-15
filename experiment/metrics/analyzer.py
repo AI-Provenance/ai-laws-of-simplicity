@@ -45,14 +45,25 @@ def paired_token_test(df: pd.DataFrame) -> tuple[float, float, float, float, flo
     Returns:
         Tuple of (mean_diff, p_value, cohens_d, ci_lower, ci_upper)
     """
-    control = df[df["condition"] == "control"]["total_tokens"]
-    treatment = df[df["condition"] == "treatment"]["total_tokens"]
+    # Pivot to get paired data aligned by task_id
+    pivot = df.pivot_table(
+        index="task_id", columns="condition", values="total_tokens", aggfunc="first"
+    )
 
     # Validate paired data
-    if len(control) != len(treatment):
+    if "control" not in pivot.columns or "treatment" not in pivot.columns:
+        raise ValueError("Data must contain both 'control' and 'treatment' conditions")
+
+    # Drop rows with missing pairs
+    pivot = pivot.dropna(subset=["control", "treatment"])
+
+    if len(pivot) == 0:
         raise ValueError(
-            f"Paired test requires equal sample sizes: control={len(control)}, treatment={len(treatment)}"
+            "No paired data found - each task needs both control and treatment runs"
         )
+
+    control = pivot["control"].values
+    treatment = pivot["treatment"].values
 
     # Paired t-test (tasks are paired)
     t_stat, p_value = stats.ttest_rel(control, treatment)
