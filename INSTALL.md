@@ -14,7 +14,7 @@ First, obtain a copy of this repository:
 
 ```bash
 # Using git
-git clone https://github.com/your-username/ai-laws-of-simplicity.git
+git clone https://github.com/AI-Provenance/ai-laws-of-simplicity.git
 cd ai-laws-of-simplicity
 
 # Or download as ZIP and extract
