@@ -1,5 +1,3 @@
-import json
-import logging
 import random
 from pathlib import Path
 from typing import Any
@@ -11,11 +9,6 @@ class SWEBenchHarness(BenchmarkHarness):
     """Harness for SWE-bench Lite benchmark."""
 
     def __init__(self, data_path: Path | None = None):
-        """Initialize SWE-bench harness.
-
-        Args:
-            data_path: Path to SWE-bench dataset (optional, downloads if not provided)
-        """
         self.data_path = data_path
         self._tasks_cache: dict[str, TaskSpec] | None = None
 
@@ -29,7 +22,7 @@ class SWEBenchHarness(BenchmarkHarness):
     def load_tasks(self, num_tasks: int, seed: int) -> list[TaskSpec]:
         """Load a random sample of SWE-bench tasks.
 
-        Simple/Medium/Complex classification based on patches:
+        Difficulty classification based on patch line count:
         - Simple: <10 lines changed
         - Medium: 10-50 lines changed
         - Complex: >50 lines changed
@@ -41,7 +34,6 @@ class SWEBenchHarness(BenchmarkHarness):
 
         task_specs = []
         for task in sampled:
-            # Estimate difficulty from patch
             patch = task.get("patch", "")
             lines_changed = len(patch.split("\n")) if patch else 0
 
@@ -56,7 +48,7 @@ class SWEBenchHarness(BenchmarkHarness):
                 task_id=task["instance_id"],
                 benchmark="swe_bench_lite",
                 prompt=task["problem_statement"],
-                test_file=None,  # SWE-bench has test_patch
+                test_file=None,
                 expected_solution=task.get("patch"),
                 difficulty=difficulty,
                 repo=task.get("repo", ""),
@@ -65,20 +57,8 @@ class SWEBenchHarness(BenchmarkHarness):
             )
             task_specs.append(spec)
 
-        # Cache tasks outside the loop
         self._tasks_cache = {t.task_id: t for t in task_specs}
-
         return task_specs
-
-    def verify_solution(self, task: TaskSpec, solution_path: Path) -> bool:
-        """Verify solution using SWE-bench test harness.
-
-        NOTE: For token consumption research (RQ1), we skip actual verification
-        since correctness is not the primary metric. Set success=True to focus
-        on token measurements.
-        """
-        logging.info(f"Skipping verification for {task.task_id} (token research mode)")
-        return True
 
     def get_task_metadata(self, task_id: str) -> dict[str, Any]:
         """Get SWE-bench task metadata."""
