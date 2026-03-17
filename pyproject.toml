@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
 [project]
 name = "ai-laws-of-simplicity"
 version = "0.1.0"
@@ -5,13 +9,9 @@ description = "Research experiment to measure the impact of Laws of Simplicity s
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "openai>=1.0.0",
-    "anthropic>=0.25.0",
-    "litellm>=1.30.0",
     "pandas>=2.0.0",
     "scipy>=1.11.0",
     "numpy>=1.24.0",
-    "statsmodels>=0.14.0",
     "docker>=6.0.0",
     "swebench>=1.0.0",
     "tqdm>=4.65.0",
@@ -22,16 +22,11 @@ dependencies = [
     "mini-swe-agent>=2.2.7",
 ]
 
-[tool.setuptools]
-packages = ["experiment"]
-
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
+    "pytest>=9.0.2",
     "pytest-cov>=4.0.0",
 ]
 
-[dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-]
+[tool.setuptools]
+packages = ["experiment"]
