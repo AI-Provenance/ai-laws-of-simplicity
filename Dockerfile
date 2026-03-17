@@ -1,27 +1,12 @@
-# Dockerfile
-# Reproducible experiment environment
-
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN pip install uv
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+RUN uv pip install --system -e ".[dev]"
 
-# Copy experiment code
-COPY experiment/ ./experiment/
-COPY scripts/ ./scripts/
-COPY skills/ ./skills/
+COPY . .
 
-# Create data directories
-RUN mkdir -p data/raw data/results
-
-# Set entry point
-ENTRYPOINT ["python", "-m", "experiment.runner"]
+ENTRYPOINT ["python", "-m", "experiment"]
