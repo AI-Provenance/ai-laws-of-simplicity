@@ -1,31 +1,22 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
 
 
 @dataclass
 class ExperimentConfig:
-    """Configuration for A/B experiment to measure the impact of Laws of Simplicity skill.
+    """Configuration for A/B experiment measuring impact of Laws of Simplicity skill.
 
-    Controls treatment assignment, skill loading, and sample sizes for the RCT.
-    Sample sizes based on G*Power: d=0.3, α=0.05, power=0.80 requires n=90.
+    Sample sizes based on G*Power: d=0.3, alpha=0.05, power=0.80 requires n=90.
     """
 
-    benchmarks: list[Literal["swe_bench_lite", "human_eval"]]
+    benchmarks: list[str] = field(default_factory=lambda: ["swe_bench_lite"])
     num_tasks_per_benchmark: int = 100
 
-    runner_type: Literal["api", "cli", "mini_agent"] = "api"
-
-    # API runner configuration
     model_string: str = "anthropic/claude-3-5-sonnet-20241022"
     temperature: float = 0.0
     max_tokens: int = 4096
     timeout_seconds: int = 600
 
-    # CLI runner configuration (only used when runner_type="cli")
-    agent_model: str | None = None
-
-    # mini-swe-agent configuration (only used when runner_type="mini_agent")
     step_limit: int = 50
     cost_limit: float = 3.0
 
@@ -46,8 +37,4 @@ class ExperimentConfig:
     planned_sample_size: int = 100
 
 
-DEFAULT_CONFIG = ExperimentConfig(
-    benchmarks=["swe_bench_lite"],
-    runner_type="api",
-    model_string="anthropic/claude-3-5-sonnet-20241022",
-)
+DEFAULT_CONFIG = ExperimentConfig()
