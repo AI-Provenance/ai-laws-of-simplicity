@@ -4,7 +4,10 @@ A standalone skill that guides AI agents to apply [John Maeda's 10 Laws of Simpl
 
 ## Overview
 
-This repository contains a skill for AI coding agents that helps them apply the principles from John Maeda's "The Laws of Simplicity" to software development. The skill provides actionable guidelines for each of the 10 Laws that agents can invoke at various stages of development to ensure simplicity principles are considered from planning through implementation and review.
+This repository contains:
+
+1. **A skill for AI coding agents** that helps them apply the principles from John Maeda's "The Laws of Simplicity" to software development
+2. **An experiment framework** to measure whether the skill reduces token consumption in multi-turn agentic coding tasks
 
 ## The 10 Laws of Simplicity
 
@@ -21,124 +24,55 @@ This repository contains a skill for AI coding agents that helps them apply the 
 
 ## Installation
 
-To install this skill in your AI coding agent, use one of the following methods based on your platform:
+To install this skill in your AI coding agent:
 
 ### For OpenCode Users
 
-Tell OpenCode to fetch and follow the installation instructions from this repository:
+Tell OpenCode to fetch and follow the installation instructions:
 ```
 Fetch and follow instructions from https://raw.githubusercontent.com/AI-Provenance/ai-laws-of-simplicity/main/INSTALL.md
 ```
 
 ### For Other Platforms
 
-See the [INSTALL.md](INSTALL.md) file for detailed, agent-agnostic installation instructions.
+See the [INSTALL.md](INSTALL.md) file for detailed instructions.
 
-## Model Configuration
+## Running the Experiment
 
-The experiment supports multiple LLM providers:
+The experiment uses [mini-swe-agent](https://github.com/princeton-nlp/SWE-agent) for multi-turn agentic execution against SWE-bench Lite tasks.
 
-### Using Anthropic (Claude)
-
-```bash
-export ANTHROPIC_API_KEY="your-key-here"
-
-uv run python -m experiment.runner \
-  --model "anthropic/claude-3-5-sonnet-20241022" \
-  --benchmarks swe_bench_lite \
-  --num-tasks 5
-```
-
-### Using OpenAI (GPT)
+### Quick Start
 
 ```bash
-export OPENAI_API_KEY="your-key-here"
-
-uv run python -m experiment.runner \
-  --model "openai/gpt-4-turbo" \
-  --benchmarks swe_bench_lite \
-  --num-tasks 5
+uv run python -m experiment --model "anthropic/claude-3-5-sonnet-20241022" --num-tasks 5
 ```
 
-### Using OpenRouter (Multi-Provider)
+### CLI Options
+
+```
+--model       LiteLLM model string (default: anthropic/claude-3-5-sonnet-20241022)
+--num-tasks   Number of tasks per benchmark (default: 100)
+--temperature LLM temperature (default: 0.0)
+--timeout     Timeout in seconds per task (default: 600)
+```
+
+### Docker
 
 ```bash
-export OPENROUTER_API_KEY="your-key-here"
-
-uv run python -m experiment.runner \
-  --model "openrouter/anthropic/claude-3.5-sonnet" \
-  --benchmarks swe_bench_lite \
-  --num-tasks 5
+docker build -t simplicity-experiment .
+docker run -v $(pwd)/data:/app/data simplicity-experiment --num-tasks 5
 ```
 
-### Using Nexos.ai
+## Files
 
-```bash
-export NEXOS_API_KEY="your-key-here"
-
-uv run python -m experiment.runner \
-  --model "nexos/claude-3-5-sonnet" \
-  --benchmarks swe_bench_lite \
-  --num-tasks 5
-```
-
-### Programmatic Usage
-
-```python
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
-
-config = ExperimentConfig(
-    benchmarks=["swe_bench_lite"],
-    num_tasks_per_benchmark=5,
-    runner_type="api",
-    model_string="anthropic/claude-3-5-sonnet-20241022",
-)
-
-runner = ExperimentRunner(config)
-runner.run()
-```
-
-### Switching Back to OpenCode CLI
-
-To use the original OpenCode integration:
-
-```python
-config = ExperimentConfig(
-    runner_type="cli",
-    agent_model="opencode-go/glm-5",
-)
-```
-
-## Usage
-
-Once installed, activate the skill in your agent:
-
-```
-skill laws-of-simplicity
-```
-
-The skill will provide guidance on applying the Laws of Simplicity to your current development task.
-
-## When to Use This Skill
-
-Consider invoking this skill:
-
-1. At the beginning of any development task
-2. Before making significant architectural decisions
-3. When evaluating different implementation approaches
-4. Before submitting code for review
-5. After completing a task to reflect on simplicity principles applied
-
-## Files in This Repository
-
-- `skills/laws-of-simplicity/SKILL.md` - The skill file containing the Laws of Simplicity guidelines
-- `INSTALL.md` - Generic installation guide for any AI coding agent
+- `skills/laws-of-simplicity/SKILL.md` — The skill file
+- `experiment/` — Experiment framework
+- `INSTALL.md` — Installation guide
 
 ## License
 
-This skill is based on "The Laws of Simplicity" by John Maeda. Please refer to the original work for licensing information.
+Based on "The Laws of Simplicity" by John Maeda.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! Please submit a Pull Request.

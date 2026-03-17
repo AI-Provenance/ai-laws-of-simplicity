@@ -1,5 +1,7 @@
 # Pilot Experiment Results
 
+> **Note (2026-03-17):** The experiment framework has been simplified since this pilot. The current version uses mini-agent only, focuses on RQ1 (token reduction), and uses paired t-test + bootstrap CI for analysis. See EXPERIMENT_STATUS.md for current state.
+
 **Date:** 2026-03-15
 **Configuration:** 5 tasks from SWE-bench Lite, 300s timeout
 **Status:** ✅ Framework validated, integration needed

@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-# scripts/analyze_results.py
-# Post-experiment statistical analysis
-
-import json
 import sys
 from pathlib import Path
 
@@ -19,29 +15,34 @@ def main():
     results_csv = runner.config.results_dir / "aggregate_results.csv"
     if not results_csv.exists():
         print(f"Error: No results found at {results_csv}")
-        print("Run the experiment first: ./scripts/run_experiment.sh")
+        print("Run the experiment first: uv run python -m experiment")
         sys.exit(1)
 
     analysis = runner.analyze()
 
-    generate_figures(runner.config.results_dir, analysis)
+    print("=== Analysis Summary ===")
+    print(f"  Mean token diff (control - treatment): {analysis['mean_diff']:+.0f}")
+    print(f"  t-statistic: {analysis['t_stat']:.3f}")
+    print(f"  p-value: {analysis['p_value']:.4f}")
+    print(f"  Cohen's d: {analysis['cohens_d']:.3f}")
+    print(f"  95% CI: [{analysis['ci_95'][0]:.0f}, {analysis['ci_95'][1]:.0f}]")
+
+    generate_figures(runner.config.results_dir)
 
     print("Analysis complete. See:")
     print(f"  - {runner.config.results_dir / 'analysis.json'}")
     print(f"  - {runner.config.results_dir / 'figures/'}")
 
 
-def generate_figures(output_dir: Path, analysis: dict) -> None:
+def generate_figures(output_dir: Path) -> None:
     """Generate paper figures."""
     import pandas as pd
+    import matplotlib.pyplot as plt
 
     figures_dir = output_dir / "figures"
     figures_dir.mkdir(exist_ok=True)
 
     df = pd.read_csv(output_dir / "aggregate_results.csv")
-
-    # Figure 1: Token reduction distribution
-    import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(10, 6))
     control = df[df["condition"] == "control"]["total_tokens"]
@@ -67,23 +68,6 @@ def generate_figures(output_dir: Path, analysis: dict) -> None:
     ax.legend()
     plt.tight_layout()
     plt.savefig(figures_dir / "figure1_token_distribution.png", dpi=150)
-    plt.close()
-
-    # Figure 2: Time-to-completion histogram
-    fig, ax = plt.subplots(figsize=(10, 6))
-    time_control = df[df["condition"] == "control"]["time_seconds"]
-    time_treatment = df[df["condition"] == "treatment"]["time_seconds"]
-
-    ax.hist(time_control, bins=30, alpha=0.6, label="Control", color="blue")
-    ax.hist(time_treatment, bins=30, alpha=0.6, label="Treatment", color="green")
-    ax.axvline(time_control.median(), color="blue", linestyle="--")
-    ax.axvline(time_treatment.median(), color="green", linestyle="--")
-    ax.set_xlabel("Time (seconds)")
-    ax.set_ylabel("Frequency")
-    ax.set_title("Time-to-Completion Distribution")
-    ax.legend()
-    plt.tight_layout()
-    plt.savefig(figures_dir / "figure2_time_distribution.png", dpi=150)
     plt.close()
 
     print(f"Figures saved to {figures_dir}")
