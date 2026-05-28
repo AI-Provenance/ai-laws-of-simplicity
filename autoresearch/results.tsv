@@ -1,0 +1,4 @@
+commit	score	dimension	status	description
+baseline	63	-	keep	baseline: core_laws=40, decision=0, workflow=8, quality=15
+iter1	88	Decision_Framework	keep	Add simplicity delta scoring, decision matrix, crash handling, thresholds, trade-off guidance (+25)
+iter2	100	Workflow_Integration	keep	Add self-evolution review, results logging format, trend analysis (+12)
