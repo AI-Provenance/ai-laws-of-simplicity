@@ -115,6 +115,52 @@ Before calling something a bug, missing behavior, unnecessary complexity, or des
 
 **THE ONE**: Regularly step back to ask: "What is the core purpose of this work, and does everything serve that purpose?"
 
+## Simplicity Delta Scoring
+
+After each change, assign a simplicity_delta score from -5 to +5:
+
+- **+5**: Major code deletion with equal or better results
+- **+3**: Cleaner organization, removed dead code, improved readability
+- **+1**: Minor cleanup or neutral change
+- **0**: No meaningful simplicity impact
+- **-1**: Slightly more complex but justified by improvement
+- **-3**: Significant complexity added for marginal gain
+- **-5**: Major hacky additions, codebase feels worse
+
+## Decision Matrix
+
+KEEP if the primary metric improved AND simplicity_delta >= -2.
+DISCARD if the primary metric is worse AND simplicity_delta <= 0.
+KEEP if the metric is equal AND simplicity_delta >= +1 (simplification win).
+KEEP if the metric is marginally worse (<=0.001) AND simplicity_delta >= +3 (major cleanup).
+
+## Crash Handling
+
+When a change causes a crash or failure, log the root cause hypothesis before retrying. Never retry the same failed approach without a different hypothesis. After 3 crashes in a direction, pivot entirely.
+
+## Trade-off Guidance
+
+All else being equal, simpler is better. A small improvement that adds ugly complexity is not worth it. The complexity cost must be justified by the improvement magnitude. Removing something and getting equal or better results is always a simplification win.
+
+## Self-Evolution Review
+
+Every 20 experiments, review results.tsv to self-improve your research strategy:
+
+1. Which laws produced the most keep decisions? Double down on those.
+2. Which laws produced the most discard decisions? Avoid those directions.
+3. Is the cumulative simplicity_delta trending positive or negative?
+4. If negative over the last 20 runs, dedicate the next 3 experiments to REDUCE and ORGANIZE.
+
+## Results Logging
+
+Record each experiment in results.tsv with these columns:
+
+```
+commit	metric	simplicity_delta	status	description
+```
+
+Log the simplicity_delta alongside the primary metric so trends are visible over time.
+
 ## Checklist for Agents
 
 When working on a task, agents using this skill should periodically ask themselves:
